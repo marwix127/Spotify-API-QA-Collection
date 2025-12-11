@@ -30,22 +30,22 @@ Este proyecto demuestra un conocimiento profundo de las metodologías de Testing
 
 ## ⚙️ Guía de Instalación y Ejecución
 
-Para ejecutar esta suite de pruebas, necesitarás Postman instalado y tu [Nombre de tu API de Node.js/Prisma] ejecutándose localmente.
+Para ejecutar esta suite de pruebas, necesitarás Postman instalado y tu "Spotify API" ejecutándose localmente.
 
 ### 1. Requisitos Previos
 
 1. Tener instalada la aplicación Postman.
-2. Tener el backend de la API (ver repositorio relacionado: [Enlace a tu repo de la API]) levantado y accesible (ej. en `http://localhost:3000`).
+2. Tener el backend de la API (ver repositorio relacionado: https://github.com/marwix127/spotify-api levantado y accesible (ej. en `http://localhost:3000`).
 
 ### 2. Importación
 
-1. Descarga los archivos `[NombreColeccion].json` y `[NombreEnvironment].json` de este repositorio.
+1. Descarga los archivos `Spotify API QA Automation.postman_collection.json` y `Spotify API QA.postman_environment.json` de este repositorio.
 2. En Postman, haz clic en **"Import"**.
 3. Selecciona ambos archivos JSON.
 
 ### 3. Configuración del Entorno
 
-1. En el menú desplegable de Entornos de Postman, selecciona `[Nombre de tu Environment]`.
+1. En el menú desplegable de Entornos de Postman, selecciona `Spotify API QA`.
 2. Ve a la gestión de Entornos y actualiza la variable `base_url` si es necesario (ej. `http://localhost:3000`).
 3. Asegúrate de que la variable `admin_token` no esté vacía (se llenará automáticamente al correr el `POST /login`).
 
@@ -59,4 +59,5 @@ Para ejecutar esta suite de pruebas, necesitarás Postman instalado y tu [Nombre
 
 ## 🟢 DEMOSTRACIÓN VISUAL
 
-[Aquí puedes insertar una captura de pantalla del Postman Runner mostrando todos los tests en verde]
+<img width="1091" height="966" alt="image" src="https://github.com/user-attachments/assets/a6f70028-d875-46a1-8ff3-f8fbb3aba8e4" />
+
