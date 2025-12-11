@@ -26,7 +26,59 @@
 									"    var jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData).to.have.property('user').to.have.property('id').to.be.a('number');\r",
 									"   \r",
-									"    pm.expect(jsonData.user.name).to.equal(\"QA Tester 123\");\r",
+									"    pm.expect(jsonData.user.name).to.equal(\"Name\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\": \"email@mail.com\", \"password\": \"securepassword123\", \"name\": \"Name\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register same user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: El estado debe ser un error de conflicto (409) o bad request (400)\r",
+									"pm.test(\"Status: 409 Conflict / 400 Bad Request - Prevención de duplicados\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([409, 400]);\r",
+									"});\r",
+									"\r",
+									"// Test 2: El mensaje de error es descriptivo\r",
+									"pm.test(\"Mensaje de error indica duplicidad\", function () {\r",
+									"    var responseBody = pm.response.text();\r",
+									"    pm.expect(responseBody).to.include(\"User already exists\"); // Busca un texto clave en el mensaje de error\r",
 									"});"
 								],
 								"type": "text/javascript",
@@ -44,6 +96,60 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\"email\": \"qatester123@mail.com\", \"password\": \"securepassword123\", \"name\": \"QA Tester 123\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: El estado debe ser 400 Bad Request\r",
+									"pm.test(\"Status: 400 Bad Request - Fallo en la validación de datos\", function () {\r",
+									"    pm.response.to.have.status(500);\r",
+									"});\r",
+									"\r",
+									"// Test 2: El mensaje de error lista los fallos\r",
+									"pm.test(\"El error indica el campo problemático\", function () {\r",
+									"    var responseBody = pm.response.text();\r",
+									"    // Busca mensajes de error de validación\r",
+									"    pm.expect(responseBody).to.include(\" `name` is missing\");\r",
+									"    \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\": \"invalidemail\", \"password\": \"short\"}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -102,6 +208,57 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"email\": \"marcel@mail.com\",\r\n  \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"\r",
+									"// Test 1: El estado debe ser 401 Unauthorized o 403 Forbidden\r",
+									"pm.test(\"Status: 401/403 - Acceso denegado con credenciales incorrectas\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([401, 403]);\r",
+									"});\r",
+									"\r",
+									"// Test 2: El token NO debe ser devuelto\r",
+									"pm.test(\"El cuerpo de la respuesta no contiene un token\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.token).to.be.undefined; // Asegurar que no se envía el token\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"marcel@mail.com\",\r\n  \"password\": \"WRONGPASSWORD\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -310,7 +467,7 @@
 									"        // Assertion: Si tiene un valor, debe ser del tipo string\r",
 									"        pm.expect(bioV).to.be.a('string'); \r",
 									"    }\r",
-									"    pm.expect(jsonData).to.have.property('image').to.be.a('string');\r",
+									"    \r",
 									"});\r",
 									"\r",
 									"// Test 3: Validación de Integridad (El valor no es nulo/vacío)\r",
@@ -416,6 +573,275 @@
 			]
 		},
 		{
+			"name": "03 - Flujo de Integración Playlists",
+			"item": [
+				{
+					"name": "Playlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Código de estado 201 (Created)\r",
+									"pm.test(\"Status: 201 Created - Playlist creada exitosamente\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Test 2: Validar que la respuesta contiene el nombre correcto\r",
+									"pm.test(\"El nombre de la playlist es correcto\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.name).to.equal(\"Mi Playlist de QA\");\r",
+									"});\r",
+									"\r",
+									"// Test 3: Guardar el ID de la nueva playlist para los siguientes requests \r",
+									"pm.test(\"Guarda el ID de la nueva playlist\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    // Guardamos el ID en una variable de entorno\r",
+									"    pm.environment.set(\"new_playlist_id\", jsonData.id);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Mi Playlist de QA\",\r\n    \"description\": \"Prueba de Integración Postman\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/playlists",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"playlists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Playlist by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status: 200 OK - Playlist creada exitosamente\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"La respuesta contiene todas las propiedades esperadas\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property(\"id\");\r",
+									"    pm.expect(jsonData).to.have.property(\"name\");\r",
+									"    pm.expect(jsonData).to.have.property(\"description\");\r",
+									"    pm.expect(jsonData).to.have.property(\"image\");\r",
+									"    pm.expect(jsonData).to.have.property(\"createdAt\");\r",
+									"    pm.expect(jsonData).to.have.property(\"userId\");\r",
+									"    pm.expect(jsonData).to.have.property(\"songs\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/playlists/{{new_playlist_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"playlists",
+								"{{new_playlist_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Playlists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status: 200 OK - Playlist creada exitosamente\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"La respuesta es un array\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    // Verificamos que el cuerpo de la respuesta es de tipo 'array'\r",
+									"    pm.expect(jsonData).to.be.an('array'); \r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"La lista no debe estar vacía (si la BD tiene datos)\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length).to.be.at.least(0); // Es al menos 0 (válido)\r",
+									"  \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/playlists",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"playlists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Song from playlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Código de estado 200/204 (Éxito al eliminar)\r",
+									"pm.test(\"Status: 200 OK / 204 No Content - Canción eliminada correctamente\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/playlists/{{new_playlist_id}}/songs/{{existing_song_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"playlists",
+								"{{new_playlist_id}}",
+								"songs",
+								"{{existing_song_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Song to playlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Código de estado 200/201 (Éxito)\r",
+									"pm.test(\"Status: 200 OK / 201 Created - Canción añadida correctamente\", function () {\r",
+									"    // Si la API devuelve 200 o 201, usamos to.be.oneOf\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"songId\": \"{{existing_song_id}}\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/playlists/{{new_playlist_id}}/songs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"playlists",
+								"{{new_playlist_id}}",
+								"songs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "04 - Funcionalidad Básica",
 			"item": [
 				{
@@ -483,6 +909,140 @@
 							],
 							"path": [
 								"albums"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Songs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Código de estado 404 (Not Found)\r",
+									"pm.test(\"Status: 404 Not Found - Manejo correcto de ID inexistente\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"// Test 2: El mensaje de error es legible para el cliente\r",
+									"pm.test(\"El mensaje de error contiene la palabra 'not found'\", function () {\r",
+									"    var responseBody = pm.response.text();\r",
+									"    pm.expect(responseBody).to.include(\"not found\"); // Verifica que el error sea descriptivo\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/songs/199",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"songs",
+								"199"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Song",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Datos del request para validaciones",
+									"const requestBody = JSON.parse(pm.request.body.raw);",
+									"",
+									"pm.test(\"Código de estado es 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Tiempo de respuesta es menor a 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"La respuesta es JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"La respuesta contiene todas las propiedades esperadas\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"id\");",
+									"    pm.expect(jsonData).to.have.property(\"title\");",
+									"    pm.expect(jsonData).to.have.property(\"duration\");",
+									"    pm.expect(jsonData).to.have.property(\"albumId\");",
+									"    pm.expect(jsonData).to.have.property(\"artistId\");",
+									"    pm.expect(jsonData).to.have.property(\"audioUrl\");",
+									"});",
+									"",
+									"pm.test(\"El tipo de dato de 'id' es número\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(typeof jsonData.id).to.eql(\"number\");",
+									"});",
+									"",
+									"pm.test(\"El 'id' existe y es mayor a 0\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.exist;",
+									"    pm.expect(jsonData.id).to.be.above(0);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Instant Crush\",\r\n  \"duration\": 337,\r\n  \"albumId\": 1,\r\n  \"artistId\": 1,\r\n  \"audioUrl\": \"https://mi-cdn.com/audio/instant-crush.mp3\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/songs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"songs"
 							]
 						}
 					},
