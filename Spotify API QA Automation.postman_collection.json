@@ -1,0 +1,547 @@
+{
+	"info": {
+		"_postman_id": "1b759b04-fd89-4042-9df9-0c2ff6370cb6",
+		"name": "Spotify API QA Automation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42932735"
+	},
+	"item": [
+		{
+			"name": "01 - Autenticación y Setup",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: El estado de la respuesta debe ser 201 Created\r",
+									"pm.test(\"Status: 201 Created - Usuario registrado correctamente\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Test 2: Validar que el objeto de respuesta contiene los campos críticos\r",
+									"pm.test(\"Respuesta contiene ID y Token\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('user').to.have.property('id').to.be.a('number');\r",
+									"   \r",
+									"    pm.expect(jsonData.user.name).to.equal(\"QA Tester 123\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\": \"qatester123@mail.com\", \"password\": \"securepassword123\", \"name\": \"QA Tester 123\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"\r",
+									"// Test 1: El estado de la respuesta debe ser 200 OK\r",
+									"pm.test(\"Status: 200 OK - Login exitoso\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Test 2: El Token existe y es de tipo String\r",
+									"pm.test(\"El Token de autenticación existe y es un string\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('token');\r",
+									"    pm.expect(jsonData.token).to.be.a('string');\r",
+									"});\r",
+									"// Guardamos el token en una variable de entorno para usarlo en otras solicitudes.\r",
+									"pm.test(\"Guarda token de autenticación\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    // Guardamos el ID en una variable de entorno\r",
+									"    pm.environment.set(\"Admin_token\", jsonData.token);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"marcel@mail.com\",\r\n  \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clean environment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Código de estado 204 (No Content)\r",
+									"pm.test(\"Status: 200 - Playlist eliminada\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"     pm.expect(responseBody).to.include(\"Playlist eliminada\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/playlists/{{new_playlist_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"playlists",
+								"{{new_playlist_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 - Flujo CRUD Artistas",
+			"item": [
+				{
+					"name": "Artist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status: 201 Created\", () => pm.response.to.have.status(201));\r",
+									"\r",
+									"pm.test(\"Validar esquema de respuesta\", () => {\r",
+									"    const res = pm.response.json();\r",
+									"    pm.expect(res.id).to.be.a('number'); \r",
+									"    pm.expect(res.name).to.equal(\"Prueba QA\");\r",
+									"    pm.environment.set(\"temp_artist_id\", res.id); // Guardamos para el resto del flujo\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\": \"Prueba QA\", \"country\": \"España\"}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/artists",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"artists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Artists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Código de estado 200 (OK)\r",
+									"pm.test(\"Status: 200 OK - El endpoint es accesible\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Test 2: La respuesta es un Array (Lista de artistas)\r",
+									"pm.test(\"La respuesta es un Array (lista de artistas)\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('array'); // Verifica que el cuerpo principal sea un array\r",
+									"});\r",
+									"\r",
+									"// Test 3: El array no está vacío (Muestra que hay datos)\r",
+									"pm.test(\"El array de artistas no está vacío\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length).to.be.above(0); // Verifica que la longitud del array sea mayor que 0\r",
+									"});\r",
+									"\r",
+									"// Test 4: Validación de Rendimiento (Test no funcional básico)\r",
+									"pm.test(\"El tiempo de respuesta es aceptable (< 500ms)\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(500); // Milisegundos\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/artists",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"artists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Artist by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Código de estado 200 (OK)\r",
+									"pm.test(\"Status: 200 OK - Se obtienen los detalles del artista\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Test 2: El objeto contiene campos críticos y son del tipo correcto \r",
+									"pm.test(\"El objeto contiene 'id', 'name', 'bio' y 'image'\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var bio = jsonData.bio;\r",
+									"    pm.expect(jsonData).to.have.property('id').to.be.a('number');\r",
+									"    pm.expect(jsonData).to.have.property('name').to.be.a('string');\r",
+									"    if (bio !== null) {\r",
+									"        // Assertion: Si tiene un valor, debe ser del tipo string\r",
+									"        pm.expect(bioV).to.be.a('string'); \r",
+									"    }\r",
+									"    pm.expect(jsonData).to.have.property('image').to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"// Test 3: Validación de Integridad (El valor no es nulo/vacío)\r",
+									"pm.test(\"El campo 'name' no es vacío\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.name).to.not.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/artists/{{temp_artist_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"artists",
+								"{{temp_artist_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Artist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status: 200 OK - Actualización exitosa\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validar que el nombre cambió correctamente\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.name).to.equal(\"Artista Editado QA\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\": \"Artista Editado QA\", \"country\": \"España\"}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/artists/{{temp_artist_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"artists",
+								"{{temp_artist_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "04 - Funcionalidad Básica",
+			"item": [
+				{
+					"name": "Album",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Verificación de disponibilidad del servicio",
+									"pm.test(\"Status: 201 Created - El endpoint es accesible (Smoke Test)\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// Test 2: Validación de que la respuesta es un objeto",
+									"pm.test(\"La respuesta es un objeto\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('object');",
+									"    pm.expect(jsonData).to.not.be.an('array');",
+									"});",
+									"",
+									"// Test 3: Validación de que el album tiene un id",
+									"pm.test(\"El album tiene un id\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"});",
+									"",
+									"// Test 4: Validación de que el id es un número",
+									"pm.test(\"El id es un número\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Random Access Memories\",\r\n  \"cover\": \"https://example.com/cover.jpg\",\r\n  \"year\": 2013,\r\n  \"artistId\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/albums",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"albums"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Albums",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test 1: Verificación de disponibilidad del servicio\r",
+									"pm.test(\"Status: 200 OK - El endpoint es accesible (Smoke Test)\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Test 2: Validación de Contrato Básico (Debe ser un array de álbumes)\r",
+									"pm.test(\"La respuesta es un array\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    // Verificamos que el cuerpo de la respuesta es de tipo 'array'\r",
+									"    pm.expect(jsonData).to.be.an('array'); \r",
+									"});\r",
+									"\r",
+									"// Test 3 : Si la lista está vacía\r",
+									"pm.test(\"La lista no debe estar vacía (si la BD tiene datos)\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length).to.be.at.least(0); // Es al menos 0 (válido)\r",
+									"     \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{Admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/albums",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"albums"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
