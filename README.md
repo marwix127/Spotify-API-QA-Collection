@@ -14,9 +14,7 @@ La colección está organizada en 5 flujos clave que cubren las funcionalidades 
 
 ---
 
-## 🔑 Habilidades de QA Demostradas
-
-Este proyecto demuestra un conocimiento profundo de las metodologías de Testing de APIs:
+## 🔑 Habilidades de QA
 
 - **Flow Testing (Pruebas Encadenadas):** Uso de variables de entorno para pasar datos dinámicos (`ID` recién creado o `Token`) entre requests.
 
