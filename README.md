@@ -2,17 +2,23 @@
 
 La colección está organizada en 5 flujos clave que cubren las funcionalidades críticas de la API:
 
-1. **01 - Autenticación y Seguridad:** Pruebas de inicio de sesión (`login`), registro y validación de errores (401, 403, 409). Punto de control de seguridad para el resto de la suite.
+## Estructura de la colección
 
-2. **02 - Flujo CRUD Artistas:** Encadenamiento de peticiones (`POST` → `PUT` → `DELETE` → `GET 404`) para simular un ciclo de vida completo de un recurso.
+### 01 - Autenticación y Setup
+Gestiona los escenarios de autenticación y configuración inicial. Incluye flujos válidos de registro e inicio de sesión, así como casos de prueba negativos: registrar un usuario duplicado, registrar con datos inválidos e intentar iniciar sesión con credenciales incorrectas.
 
-3. **03 - Flujo de Integración Playlists:** Prueba de negocio compleja que simula un usuario añadiendo y eliminando canciones de una playlist.
+### 02 - Funcionalidad Básica
+Valida las operaciones básicas de lectura y escritura para las entidades principales del catálogo: agregar y obtener Álbumes y Canciones.
 
-4. **04 - Flujo CRUD Canciones:** Repetición del ciclo CRUD para una entidad secundaria, demostrando cobertura total.
+### 03 - Flujo CRUD Artistas
+Cubre el ciclo de vida CRUD completo para Artistas: crear un nuevo artista, listar todos los artistas, obtener un artista específico por ID y actualizar un artista existente.
 
-5. **05 - Funcionalidad Básica (Smoke Tests):** Verificación de disponibilidad (`200 OK`) y tipo de dato (`Array`) para los endpoints de lectura restantes.
+### 04 - Flujo de Integración Playlists
+Prueba el flujo de integración completo de playlists: crear una playlist, listar todas las playlists, obtener una playlist por ID, agregar una canción a una playlist y eliminar una canción de una playlist.
 
----
+### 05 - Limpieza
+Realiza la limpieza del entorno después de las pruebas eliminando la playlist creada durante el flujo de integración, asegurando que el entorno quede restablecido entre ejecuciones.
+
 
 ## 🔑 Habilidades de QA
 
