@@ -1,3 +1,5 @@
+[![API Tests (Newman)](https://github.com/marwix127/Spotify-API-QA-Collection/actions/workflows/api-tests.yml/badge.svg)](https://github.com/marwix127/Spotify-API-QA-Collection/actions/workflows/api-tests.yml)
+
 # 🎯 Estrategia de Cobertura de Pruebas
 
 La colección está organizada en 5 flujos clave que cubren las funcionalidades críticas de la API:
@@ -58,6 +60,21 @@ Para ejecutar esta suite de pruebas, necesitarás Postman instalado y tu "Spotif
 1. Haz clic en el icono **Runner** en la parte inferior de Postman.
 2. Arrastra y suelta toda la colección al Runner.
 3. Asegúrate de seleccionar el entorno correcto y presiona **"Run"**.
+
+---
+
+## 🤖 Integración Continua (GitHub Actions)
+
+La suite se ejecuta automáticamente con [Newman](https://github.com/postmanlabs/newman) en cada push a `main`, en cada pull request y bajo demanda (workflow: [`api-tests.yml`](.github/workflows/api-tests.yml)).
+
+El pipeline es autosuficiente — no depende de ningún entorno externo:
+
+1. **Clona el backend** ([spotify-api](https://github.com/marwix127/spotify-api)) y lo levanta con Docker Compose (API + PostgreSQL), aplicando las migraciones de Prisma.
+2. **Puebla la base de datos** ejecutando la seed y pre-registra los usuarios que la colección asume existentes (necesarios para el login y el test negativo de registro duplicado).
+3. **Ejecuta la colección completa** con Newman contra la API recién levantada.
+4. **Publica un reporte HTML** (newman-reporter-htmlextra) como artifact de la corrida, disponible incluso cuando hay tests fallidos.
+
+El estado de la última ejecución se refleja en el badge al inicio de este README, y los reportes pueden descargarse desde la pestaña [Actions](https://github.com/marwix127/Spotify-API-QA-Collection/actions) del repositorio.
 
 ---
 
