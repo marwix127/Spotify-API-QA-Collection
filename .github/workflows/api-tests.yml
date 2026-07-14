@@ -19,15 +19,15 @@ jobs:
           repository: marwix127/spotify-api
           path: spotify-api
 
-      # El docker-compose del backend no define JWT_SECRET y el login lo necesita
-      - name: Configurar JWT_SECRET para el contenedor
+      # El backend espera un .env (gitignorado): prisma.config.ts exige DATABASE_URL
+      # incluso durante el build (npx prisma generate), y el login necesita JWT_SECRET.
+      # En runtime el DATABASE_URL real lo inyecta docker-compose (dotenv no lo pisa).
+      - name: Crear .env para el backend
         working-directory: spotify-api
         run: |
-          cat > docker-compose.override.yml <<'EOF'
-          services:
-            api:
-              environment:
-                JWT_SECRET: ci-secret-solo-para-tests
+          cat > .env <<'EOF'
+          DATABASE_URL=postgres://postgres:postgres@db:5432/spotify
+          JWT_SECRET=ci-secret-solo-para-tests
           EOF
 
       - name: Levantar Postgres + API
