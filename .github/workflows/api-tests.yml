@@ -1,0 +1,84 @@
+name: API Tests (Newman)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout de la colección QA
+        uses: actions/checkout@v4
+
+      - name: Checkout del backend (spotify-api)
+        uses: actions/checkout@v4
+        with:
+          repository: marwix127/spotify-api
+          path: spotify-api
+
+      # El docker-compose del backend no define JWT_SECRET y el login lo necesita
+      - name: Configurar JWT_SECRET para el contenedor
+        working-directory: spotify-api
+        run: |
+          cat > docker-compose.override.yml <<'EOF'
+          services:
+            api:
+              environment:
+                JWT_SECRET: ci-secret-solo-para-tests
+          EOF
+
+      - name: Levantar Postgres + API
+        working-directory: spotify-api
+        run: docker compose up -d --build
+
+      - name: Esperar a que la API responda
+        working-directory: spotify-api
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/ > /dev/null; then
+              echo "API lista"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "La API no arrancó a tiempo"
+          docker compose logs
+          exit 1
+
+      - name: Seed de la base de datos
+        working-directory: spotify-api
+        run: docker compose exec -T api node prisma/seed.js
+
+      # La colección asume que estos usuarios ya existen:
+      # marcel@mail.com -> login (Admin_token) y test de password incorrecto
+      # qatester123@mail.com -> test de registro duplicado (espera 400/409)
+      - name: Pre-registrar usuarios que la colección espera
+        run: |
+          curl -sf -X POST http://localhost:3000/auth/register \
+            -H "Content-Type: application/json" \
+            -d '{"name":"Marcel","email":"marcel@mail.com","password":"123456"}'
+          curl -sf -X POST http://localhost:3000/auth/register \
+            -H "Content-Type: application/json" \
+            -d '{"name":"QA Tester 123","email":"qatester123@mail.com","password":"securepassword123"}'
+
+      - name: Instalar Newman
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Ejecutar la colección
+        run: >
+          newman run "Spotify API QA Automation.postman_collection.json"
+          -e "Spotify API QA.postman_environment.json"
+          --env-var base_url=http://localhost:3000
+          --env-var existing_song_id=1
+          --reporters cli,htmlextra
+          --reporter-htmlextra-export newman-report.html
+
+      - name: Subir reporte HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: newman-report.html
